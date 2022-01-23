@@ -1,0 +1,28 @@
+name: #PROJECT_NAME#
+options:
+  carthageExecutablePath: 'mint run carthage carthage'
+targets:
+  #PROJECT_NAME#:
+    type: application
+    platform: iOS
+    deploymentTarget: 11.0
+    sources: [#PROJECT_NAME#]
+    settings:
+      PRODUCT_BUNDLE_IDENTIFIER: com.#PROJECT_NAME#.ios
+      SWIFT_VERSION: '5.0'
+    postCompileScripts:
+      - script: |
+          if mint list | grep -q 'SwiftLint'; then
+          mint run SwiftLint swiftlint autocorrect
+          mint run SwiftLint swiftlint
+          else
+          echo "warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint"
+          fi
+        name: Swiftlint
+  #PROJECT_NAME#Tests:
+    type: bundle.unit-test
+    platform: iOS
+    deploymentTarget: '10.0'
+    sources: [#PROJECT_NAME#Tests]
+    dependencies:
+      - target: #PROJECT_NAME#
