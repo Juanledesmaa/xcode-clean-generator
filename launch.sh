@@ -20,11 +20,11 @@ if [ "$2" != "" ]; then
     elif [ "$2" == "carthage" ]; then
     PACKAGE_MANAGER=2
     else
-    echo "No valid name for dependency manager, proceeding with Swift Package Manager (No config required)"
+    echo "No valid name for package manager, proceeding with Swift Package Manager (No config required)"
     PACKAGE_MANAGER=3
     fi
 else
-    echo "Dependency manager required!"
+    echo "Package manager selection required!"
     exit 1
 fi
 
