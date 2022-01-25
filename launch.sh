@@ -20,6 +20,7 @@ if [ "$2" != "" ]; then
     elif [ "$2" == "carthage" ]; then
     PACKAGE_MANAGER=2
     else
+    echo "No valid name for dependency manager, proceeding with Swift Package Manager (No config required)"
     PACKAGE_MANAGER=3
     fi
 else
@@ -35,7 +36,7 @@ if [ "$3" != "" ]; then
     WITH_STORYBOARD=1
     fi
 else
-    echo "Files will remain untouched!"
+    echo "Keeping Storyboard, Files will remain untouched!"
 fi
 
 # Download template project from github
@@ -64,7 +65,7 @@ mv ForkApp $1
 mv ForkAppTests "$1Tests"
 sed -i '' "s/#PROJECT_NAME#/$1/g" project.yml
 
-if [ "$PACKAGE_MANAGER" == 1 ] ;then
+if [[ "$PACKAGE_MANAGER" == 1 ]] ;then
   mint run xcodegen
   pod init
   pod install
@@ -76,7 +77,7 @@ else
   mint run xcodegen
 fi
 
-if [ $WITH_STORYBOARD == 0 ] ;then
+if [[ "$WITH_STORYBOARD" == 0 ]] ;then
   # Script to remove Main.Storyboard if needed
 
   cd $1
