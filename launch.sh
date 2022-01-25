@@ -49,12 +49,13 @@ if [ -e "Mintfile" ]; then
     sed -i '' '/#REPLACE_CARTHAGE#/d' Mintfile
     PACKAGE_MANAGER="cocoa"
   elif [[ $choice == 2 ]]; then
-    sed -i '' 's|#REPLACE_COCOA#|Carthage/Carthage@0.38.0|g' Mintfile
-    sed -i '' '/#REPLACE_COCOA#/d' Mintfile
+    sed -i '' 's|#REPLACE_CARTHAGE#|Carthage/Carthage@0.38.0|g' Mintfile
     touch Cartfile
     touch Cartfile.resolved
     PACKAGE_MANAGER="carthage"
   else
+    sed -i '' '/#REPLACE_CARTHAGE#/d' Mintfile
+    PACKAGE_MANAGER="none"
     echo "No additional config required"
   fi
 # END: Package manager Selection
