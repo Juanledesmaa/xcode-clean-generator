@@ -5,11 +5,11 @@ Install [Homebrew](https://brew.sh/)
 
 ### Parameters
 
-#### 1. NameOfYourApp: Replace with whichever name you would like for your project
+#### 1. `NameOfYourApp`: Replace with whichever name you would like for your project
 
-#### 2. PackageManager: Options are: `cocoa`, `carthage`, `none`. You could use none if you would like to use spm on xcode
+#### 2. `PackageManager`: Options are: `cocoa`, `carthage`, `none`. You could use none if you would like to use spm on xcode
 
-#### 2. no-storyboard: Must be passed as literal `no-storyboard` if the parameter is not passed we will just ignore and keep the storyboard file.
+#### 2. `no-storyboard`: Must be passed as literal `no-storyboard` if the parameter is not passed we will just ignore and keep the storyboard file.
 
 #### So an example will look like this:
 
