@@ -19,6 +19,46 @@ cd $1
 rm -Rf .git 
 
 if [ -e "Mintfile" ]; then
+  # Start: Package manager Selection
+  # clear the screen
+  tput clear
+  
+  # Move cursor to screen location X,Y (top left is 0,0)
+  tput cup 5 
+  echo "Which package manager do you wish to use:"
+  tput sgr0
+  
+  tput cup 7 3
+  echo "1. CocoaPods"
+  
+  tput cup 8 3
+  echo "2. Carthage"
+  
+  tput cup 9 3
+  echo "3. Swift Package Manager (No config required)"
+  
+  tput bold
+  tput cup 12 3
+  read -p "Select your choice [1-3] " choice
+  
+  tput clear
+  tput sgr0
+  tput rc
+
+  if [[ $choice == 1 ]]; then
+    sed -i '' '/#REPLACE_CARTHAGE#/d' Mintfile
+    PACKAGE_MANAGER="cocoa"
+  elif [[ $choice == 2 ]]; then
+    sed -i '' 's|#REPLACE_COCOA#|Carthage/Carthage@0.38.0|g' Mintfile
+    sed -i '' '/#REPLACE_COCOA#/d' Mintfile
+    touch Cartfile
+    touch Cartfile.resolved
+    PACKAGE_MANAGER="carthage"
+  else
+    echo "No additional config required"
+  fi
+# END: Package manager Selection
+
   install_current mint
   mint bootstrap
 fi
@@ -26,14 +66,42 @@ fi
 mv ForkApp $1
 mv ForkAppTests "$1Tests"
 sed -i '' "s/#PROJECT_NAME#/$1/g" project.yml
-mint run carthage carthage bootstrap --platform iOS --no-use-binaries --cache-builds
-mint run xcodegen
 
+if [ "$PACKAGE_MANAGER" == "cocoa" ] ;then
+  mint run xcodegen
+  pod init
+  pod install
+elif [[ "$PACKAGE_MANAGER" == "carthage" ]]; then
+  mint run carthage carthage bootstrap --platform iOS --no-use-binaries --cache-builds
+  mint run xcodegen
+else
+  echo "No Package manager was selected, skipping..."
+  mint run xcodegen
+fi
 
-echo -n "Do you want to remove the Main.Storyboard and work your view through code (y/n)? "
-read answer
+# Start: StoryBoard usage selection
+# clear the screen
+tput clear
 
-if [ "$answer" != "${answer#[Yy]}" ] ;then
+# Move cursor to screen location X,Y (top left is 0,0)
+tput cup 5 
+echo "Do you want to work your layouts through the code:"
+tput sgr0
+tput cup 7 3
+echo "1. Yes (Will remove the reference to the Main.storyboard file and add boilerplate on AppDelegate.swift)"
+
+tput cup 10 3
+echo "2. No (Files remains untouched)"
+
+tput bold
+tput cup 12 3
+read -p "Select your choice [1-2] " storyboard_choice
+
+tput clear
+tput sgr0
+tput rc
+
+if [ $storyboard_choice == 1 ] ;then
   # Script to remove Main.Storyboard if needed
 
   cd $1
@@ -55,28 +123,25 @@ if [ "$answer" != "${answer#[Yy]}" ] ;then
 
   cd ../../../Sources
 
-  # Set the filename
-  sceneDelegateFileName='SceneDelegate.swift'
+  # # Set the filename
+  # sceneDelegateFileName='SceneDelegate.swift'
 
-  # Check the file is exists or not
-  if [ -f $filename ]; then
-     rm $sceneDelegateFileName
-     echo "$filename is removed"
-  fi
+  # # Check the file is exists or not
+  # if [ -f $filename ]; then
+  #    rm $sceneDelegateFileName
+  #    echo "$filename is removed"
+  # fi
 
   sed -i '' 's/return true/let window = UIWindow(frame: UIScreen.main.bounds)\n\tlet mockViewController = ViewController()\n\tmockViewController.view.backgroundColor = .red\n\twindow.rootViewController = mockViewController\n\twindow.makeKeyAndVisible()\n\tself.window = window\n\treturn true/' AppDelegate.swift
 
   lineNumberSceneDelegates=$(grep -n '// MARK: UISceneSession Lifecycle' AppDelegate.swift | cut -d : -f 1)
 
-  echo $lineNumberSceneDelegates
-
   sed -i '' '27,42d' AppDelegate.swift
   echo ""
   echo ""
-  echo "Configuration complete!. Remember to completely remove your Main.Storyboard reference and SceneDelegate.swift file, I'll promise to improve this in the future ;)"
+  echo "Configuration complete!. Remember to completely remove your Main.Storyboard reference and SceneDelegate.swift file, promise to improve this in the future :)"
 else
     echo "Configuration complete!."
 fi
 
-
-
+# END: StoryBoard usage selection
