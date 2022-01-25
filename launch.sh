@@ -16,12 +16,12 @@ fi
 if [ "$2" != "" ]; then
     echo "Dependency manager: $2"
     if [ "$2" == "cocoa" ]; then
-    PACKAGE_MANAGER=1
+    PACKAGE_MANAGER="1"
     elif [ "$2" == "carthage" ]; then
-    PACKAGE_MANAGER=2
+    PACKAGE_MANAGER="2"
     else
     echo "No valid name for package manager, proceeding with Swift Package Manager (No config required)"
-    PACKAGE_MANAGER=3
+    PACKAGE_MANAGER="3"
     fi
 else
     echo "Package manager selection required!"
@@ -31,9 +31,9 @@ fi
 if [ "$3" != "" ]; then
     echo "With Storyboard: $3"
     if [ "$3" == "no-storyboard" ]; then
-    WITH_STORYBOARD=0
+    WITH_STORYBOARD="0"
     else
-    WITH_STORYBOARD=1
+    WITH_STORYBOARD="1"
     fi
 else
     echo "Keeping Storyboard, Files will remain untouched!"
@@ -45,9 +45,9 @@ cd $1
 rm -Rf .git 
 
 if [ -e "Mintfile" ]; then
-  if [[ $PACKAGE_MANAGER == 1 ]]; then
+  if [[ "$PACKAGE_MANAGER" == "1" ]]; then
     sed -i '' '/#REPLACE_CARTHAGE#/d' Mintfile
-  elif [[ $PACKAGE_MANAGER == 2 ]]; then
+  elif [[ "$PACKAGE_MANAGER" == "2" ]]; then
     sed -i '' 's|#REPLACE_CARTHAGE#|Carthage/Carthage@0.38.0|g' Mintfile
     touch Cartfile
     touch Cartfile.resolved
@@ -65,11 +65,11 @@ mv ForkApp $1
 mv ForkAppTests "$1Tests"
 sed -i '' "s/#PROJECT_NAME#/$1/g" project.yml
 
-if [[ "$PACKAGE_MANAGER" == 1 ]] ;then
+if [[ "$PACKAGE_MANAGER" == "1" ]] ;then
   mint run xcodegen
   pod init
   pod install
-elif [[ "$PACKAGE_MANAGER" == 2 ]]; then
+elif [[ "$PACKAGE_MANAGER" == "2" ]]; then
   mint run carthage carthage bootstrap --platform iOS --no-use-binaries --cache-builds
   mint run xcodegen
 else
@@ -77,7 +77,7 @@ else
   mint run xcodegen
 fi
 
-if [[ "$WITH_STORYBOARD" == 0 ]] ;then
+if [[ "$WITH_STORYBOARD" == "0" ]] ;then
   # Script to remove Main.Storyboard if needed
 
   cd $1
