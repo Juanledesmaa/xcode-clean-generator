@@ -13,45 +13,49 @@ else
     exit 1
 fi
 
-if [ "$2" != "" ]; then
-    echo "Dependency manager: $2"
-    if [ "$2" == "cocoa" ]; then
-    PACKAGE_MANAGER=1
-    elif [ "$2" == "carthage" ]; then
-    PACKAGE_MANAGER=2
-    else
-    PACKAGE_MANAGER=3
-    fi
-else
-    echo "Dependency manager required!"
-    exit 1
-fi
-
-if [ "$3" != "" ]; then
-    echo "With Storyboard: $3"
-    if [ "$3" == "no-storyboard" ]; then
-    WITH_STORYBOARD=0
-    else
-    WITH_STORYBOARD=1
-    fi
-else
-    echo "Files will remain untouched!"
-fi
-
 # Download template project from github
 git clone "https://github.com/Juanledesmaa/xcode-clean-generator.git" $1
 cd $1
 rm -Rf .git 
 
 if [ -e "Mintfile" ]; then
-  if [[ $PACKAGE_MANAGER == 1 ]]; then
+  # Start: Package manager Selection
+  # clear the screen
+  tput clear
+  
+  # Move cursor to screen location X,Y (top left is 0,0)
+  tput cup 5 
+  echo "Which package manager do you wish to use:"
+  tput sgr0
+  
+  tput cup 7 3
+  echo "1. CocoaPods"
+  
+  tput cup 8 3
+  echo "2. Carthage"
+  
+  tput cup 9 3
+  echo "3. Swift Package Manager (No config required)"
+  
+  tput bold
+  tput cup 12 3
+  read -p "Select your choice [1-3] " choice
+  
+  tput clear
+  tput sgr0
+  tput rc
+
+  if [[ $choice == 1 ]]; then
     sed -i '' '/#REPLACE_CARTHAGE#/d' Mintfile
-  elif [[ $PACKAGE_MANAGER == 2 ]]; then
+    PACKAGE_MANAGER="cocoa"
+  elif [[ $choice == 2 ]]; then
     sed -i '' 's|#REPLACE_CARTHAGE#|Carthage/Carthage@0.38.0|g' Mintfile
     touch Cartfile
     touch Cartfile.resolved
+    PACKAGE_MANAGER="carthage"
   else
     sed -i '' '/#REPLACE_CARTHAGE#/d' Mintfile
+    PACKAGE_MANAGER="none"
     echo "No additional config required"
   fi
 # END: Package manager Selection
@@ -64,11 +68,11 @@ mv ForkApp $1
 mv ForkAppTests "$1Tests"
 sed -i '' "s/#PROJECT_NAME#/$1/g" project.yml
 
-if [ "$PACKAGE_MANAGER" == 1 ] ;then
+if [ "$PACKAGE_MANAGER" == "cocoa" ] ;then
   mint run xcodegen
   pod init
   pod install
-elif [[ "$PACKAGE_MANAGER" == 2 ]]; then
+elif [[ "$PACKAGE_MANAGER" == "carthage" ]]; then
   mint run carthage carthage bootstrap --platform iOS --no-use-binaries --cache-builds
   mint run xcodegen
 else
@@ -76,7 +80,29 @@ else
   mint run xcodegen
 fi
 
-if [ $WITH_STORYBOARD == 0 ] ;then
+# Start: StoryBoard usage selection
+# clear the screen
+tput clear
+
+# Move cursor to screen location X,Y (top left is 0,0)
+tput cup 5 
+echo "Do you want to work your layouts through the code:"
+tput sgr0
+tput cup 7 3
+echo "1. Yes (Will remove the reference to the Main.storyboard file and add boilerplate on AppDelegate.swift)"
+
+tput cup 10 3
+echo "2. No (Files remains untouched)"
+
+tput bold
+tput cup 12 3
+read -p "Select your choice [1-2] " storyboard_choice
+
+tput clear
+tput sgr0
+tput rc
+
+if [ $storyboard_choice == 1 ] ;then
   # Script to remove Main.Storyboard if needed
 
   cd $1
